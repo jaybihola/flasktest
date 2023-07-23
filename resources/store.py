@@ -12,37 +12,31 @@ blp = Blueprint("stores", __name__, description="Operations on stores")
 class Store(MethodView):
     @blp.response(200, StoreSchema)
     def get(self, store_id):
-        try:
-            return stores[store_id]
-        except KeyError:
-            abort(404, message="Store not found")
+        store = StoreModel.query.get_or_404(store_id)
+        return store
 
     @blp.arguments(StoreUpdateSchema)
     @blp.response(200, StoreSchema)
     def put(self, store_data, store_id):
-        if "name" not in store_data:
-            abort(400, message="Bad request. Please provide fields to update")
-
-        try:
-            curr_store = stores[store_id]
-            curr_store |= store_data
-            return curr_store
-        except KeyError:
-            abort(404, message="Item not found")
+        store = StoreModel.query.get(store_id)
+        if store:
+            store.name = store_data["name"]
+        else:
+            store = StoreModel(id = store_id, **store_data)
+        db.session.add(store)
+        db.session.commit()
+        return store
 
     def delete(self, store_id):
-        try:
-            del stores[store_id]
-            return {"message": "Store deleted"}
-        except KeyError:
-            abort(404, message="Store not found")
-
+        store = StoreModel.query.get_or_404(store_id)
+        raise NotImplementedError("Updating an item is not implemented yet")
 
 @blp.route("/store")
 class StoreList(MethodView):
     @blp.response(200, StoreSchema(many=True))
     def get(self):
-        return stores.values()
+        stores = db.session.query(StoreModel)
+        return stores
 
     @blp.arguments(StoreSchema)
     @blp.response(201, StoreSchema)
