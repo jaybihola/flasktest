@@ -4,3 +4,4 @@ sqlalchemy
 flask-sqlalchemy
 python-dotenv
 marshmallow~=3.20.1
+psycopg2
