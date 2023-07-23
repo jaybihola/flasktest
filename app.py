@@ -36,6 +36,22 @@ def get_store(store_id):
         abort(404, message="Store not found")
 
 
+@app.put("/store/<string:store_id>")
+def update_store(store_id):
+    store_data = request.get_json()
+
+    if "name" not in store_data:
+        abort(400, message="Bad request. Please provide fields to update")
+
+    try:
+        curr_store = stores[store_id]
+        curr_store |= store_data
+        return curr_store
+    except KeyError:
+        abort(404, message="Item not found")
+
+
+
 @app.delete("/store/<string:store_id>")
 def delete_store(store_id):
     try:
@@ -78,6 +94,22 @@ def get_item(item_id):
         return items[item_id]
     except:
         abort(404, message="Item not found")
+
+
+@app.put("/item/<string:item_id>")
+def update_item(item_id):
+    item_data = request.get_json()
+
+    if "price" not in item_data or "name" not in item_data:
+        abort(400, message="Bad request. Please provide fields to update")
+
+    try:
+        curr_item = items[item_id]
+        curr_item |= item_data
+        return curr_item
+    except KeyError:
+        abort(404, message="Item not found")
+
 
 @app.delete("/item/<string:item_id>")
 def delete_item(item_id):
